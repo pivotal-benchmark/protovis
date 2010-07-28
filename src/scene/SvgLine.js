@@ -1,7 +1,12 @@
 pv.SvgScene.line = function(scenes) {
+  console.log("scenes for Line:", scenes);
   var e = scenes.$g.firstChild;
   if (scenes.length < 2) return e;
   var s = scenes[0];
+  var data = [];
+  for (var i = 0; i < scenes.length; i++) {
+    data.push(scenes[i].data);
+  }
 
   /* segmented */
   if (s.segmented) return this.lineSegment(scenes);
@@ -27,17 +32,18 @@ pv.SvgScene.line = function(scenes) {
   }
 
   e = this.expect(e, "path", {
-      "shape-rendering": s.antialias ? null : "crispEdges",
-      "pointer-events": s.events,
-      "cursor": s.cursor,
-      "d": d,
-      "fill": fill.color,
-      "fill-opacity": fill.opacity || null,
-      "stroke": stroke.color,
-      "stroke-opacity": stroke.opacity || null,
-      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-linejoin": s.lineJoin
-    });
+    "shape-rendering" : s.antialias ? null : "crispEdges",
+    "pointer-events"  : s.events,
+    "cursor"          : s.cursor,
+    "d"               : d,
+    "fill": fill.color,
+    "fill-opacity": fill.opacity || null,
+    "stroke": stroke.color,
+    "stroke-opacity": stroke.opacity || null,
+    "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
+    "stroke-linejoin": s.lineJoin,
+    "data-values" : JSON.stringify(data)
+  });
   return this.append(e, scenes, 0);
 };
 
@@ -66,24 +72,24 @@ pv.SvgScene.lineSegment = function(scenes) {
       fill = stroke;
       stroke = pv.Color.transparent;
       d = this.pathJoin(scenes[i - 1], s1, s2, scenes[i + 2]);
-    } else if(paths) {
+    } else if (paths) {
       d = paths[i];
     } else {
       d = "M" + s1.left + "," + s1.top + this.pathSegment(s1, s2);
     }
-
     e = this.expect(e, "path", {
-        "shape-rendering": s1.antialias ? null : "crispEdges",
-        "pointer-events": s1.events,
-        "cursor": s1.cursor,
-        "d": d,
-        "fill": fill.color,
-        "fill-opacity": fill.opacity || null,
-        "stroke": stroke.color,
-        "stroke-opacity": stroke.opacity || null,
-        "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null,
-        "stroke-linejoin": s1.lineJoin
-      });
+      "shape-rendering": s1.antialias ? null : "crispEdges",
+      "pointer-events": s1.events,
+      "cursor": s1.cursor,
+      "d": d,
+      "fill": fill.color,
+      "fill-opacity": fill.opacity || null,
+      "stroke": stroke.color,
+      "stroke-opacity": stroke.opacity || null,
+      "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null,
+      "stroke-linejoin": s1.lineJoin,
+      "data-value1" : JSON.stringify(s1.data)
+    });
     e = this.append(e, scenes, i);
   }
   return e;
@@ -97,9 +103,9 @@ pv.SvgScene.pathSegment = function(s1, s2) {
       l = 0;
     case "polar": {
       var dx = s2.left - s1.left,
-          dy = s2.top - s1.top,
-          e = 1 - s1.eccentricity,
-          r = Math.sqrt(dx * dx + dy * dy) / (2 * e);
+        dy = s2.top - s1.top,
+        e = 1 - s1.eccentricity,
+        r = Math.sqrt(dx * dx + dy * dy) / (2 * e);
       if ((e <= 0) || (e > 1)) break; // draw a straight line
       return "A" + r + "," + r + " 0 0," + l + " " + s2.left + "," + s2.top;
     }
@@ -123,14 +129,14 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
    * no joins).
    */
   var p1 = pv.vector(s1.left, s1.top),
-      p2 = pv.vector(s2.left, s2.top),
-      p = p2.minus(p1),
-      v = p.perp().norm(),
-      w = v.times(s1.lineWidth / (2 * this.scale)),
-      a = p1.plus(w),
-      b = p2.plus(w),
-      c = p2.minus(w),
-      d = p1.minus(w);
+    p2 = pv.vector(s2.left, s2.top),
+    p = p2.minus(p1),
+    v = p.perp().norm(),
+    w = v.times(s1.lineWidth / (2 * this.scale)),
+    a = p1.plus(w),
+    b = p2.plus(w),
+    c = p2.minus(w),
+    d = p1.minus(w);
 
   /*
    * Start join. P0 is the previous line segment's start point. We define the
@@ -153,7 +159,7 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
   }
 
   return "M" + a.x + "," + a.y
-       + "L" + b.x + "," + b.y
-       + " " + c.x + "," + c.y
-       + " " + d.x + "," + d.y;
+    + "L" + b.x + "," + b.y
+    + " " + c.x + "," + c.y
+    + " " + d.x + "," + d.y;
 };

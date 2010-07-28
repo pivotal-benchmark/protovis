@@ -2,6 +2,11 @@ pv.SvgScene.area = function(scenes) {
   var e = scenes.$g.firstChild;
   if (!scenes.length) return e;
   var s = scenes[0];
+  var data = [];
+  for (var h = 0; h < scenes.length; h++) {
+    data.push(scenes[h].data);
+  }
+
 
   /* segmented */
   if (s.segmented) return this.areaSegment(scenes);
@@ -95,7 +100,8 @@ pv.SvgScene.area = function(scenes) {
       "fill-opacity": fill.opacity || null,
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
-      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
+      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
+      "data-values" : JSON.stringify(data)
     });
   return this.append(e, scenes, 0);
 };
@@ -164,7 +170,8 @@ pv.SvgScene.areaSegment = function(scenes) {
         "fill-opacity": fill.opacity || null,
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity || null,
-        "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null
+        "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null,
+        "data-values" : JSON.stringify(s1.data)
       });
     e = this.append(e, scenes, i);
   }
